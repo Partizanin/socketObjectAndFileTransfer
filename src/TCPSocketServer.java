@@ -2,7 +2,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.text.DecimalFormat;
 
 public class TCPSocketServer {
     private ServerSocket serverSocket = null;
@@ -13,19 +12,20 @@ public class TCPSocketServer {
     private InputStream readInStream = null;
     private OutputStream readOuStream;
     private TransferObject transferObject;
-    private Thread thread = null;
+    private Utils utils = new Utils();
 
-    public static void main(String[] args) {
-        new TCPSocketServer().communicate();
-
-    }
     TCPSocketServer() {
         communicate2();
 
     }
 
-    public void communicate2() {
-           thread = new Thread() {
+    public static void main(String[] args) {
+        new TCPSocketServer().communicate();
+
+    }
+
+    private void communicate2() {
+        Thread thread = new Thread() {
             @Override
             public void run() {
                 int fileCounter = -1;
@@ -48,21 +48,20 @@ public class TCPSocketServer {
                         size = dataInputStream.readLong();
                         long size2 = size;
                         long count = 0;
-                        byte[] buffer = new byte[1024];
+                        byte[] buffer = new byte[4092];
                         int bytesRead;
                         try {
                             while (size > 0 && (bytesRead = dataInputStream.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
                                 readOuStream.write(buffer, 0, bytesRead);
                                 count += bytesRead;
                                 size -= bytesRead;
-                                if (count % (size2 / 5) == 0) {
-                                    System.out.println("Передано: " + readableFileSize(count));
+                                if (count % (size2) == 0) {
+                                    System.out.println(utils.getCurrentDateTime() + " Передано: " + utils.readableFileSize(count));
                                 }
                             }
                             File file = transferObject.getFiles().get(fileCounter);
                             System.out.println(file.getName());
-                            System.out.println("Всього передано: " + readableFileSize(count));
-                            System.out.println("Або: " + count + " байт");
+                            System.out.println("Всього передано: " + utils.readableFileSize(count));
                             System.out.println("Або: " + file.length() + " байт\n");
 
                         } catch (IOException e) {
@@ -71,9 +70,9 @@ public class TCPSocketServer {
 
                         readOuStream.flush();
 
-                            readInStream.close();
-                            readOuStream.close();
-                            readSocket.close();
+                        readInStream.close();
+                        readOuStream.close();
+                        readSocket.close();
                         if (fileCounter == transferObject.getFiles().size() - 1) {
                             fileCounter = 0;
                         }
@@ -86,7 +85,7 @@ public class TCPSocketServer {
                     e.printStackTrace();
                 }
 
-            }/*todo: Проблема,якщо сокет не закривається то файли "не відпускаються" до тих пір поки він не закриється*/
+            }
         };
 
         thread.start();
@@ -96,15 +95,16 @@ public class TCPSocketServer {
     void communicate() {
         try {
             serverSocket = new ServerSocket(4445);
+            System.out.println(utils.getCurrentDateTime() + " Запуск сервера");
             while (true) {
+                System.out.println(utils.getCurrentDateTime() + " Очікування підключення");
                 socket = serverSocket.accept();
-                System.out.println("Connected");
+                System.out.println(utils.getCurrentDateTime() + " " + socket.getInetAddress() + " Клієнт підключено \n");
 
                 inStream = new ObjectInputStream(socket.getInputStream());
 
                 transferObject = (TransferObject) inStream.readObject();
 
-                System.out.println("Object received = " + transferObject);
                 if (transferObject.getMessage().equals("stop")) {
                     break;
                 }
@@ -119,11 +119,5 @@ public class TCPSocketServer {
         }
     }
 
-    private  String readableFileSize(long size) {
-        if(size <= 0) return "0";
-        final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
-        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
-    }
 
 }
