@@ -24,5 +24,17 @@ public class Utils {
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
+    public int getLogCounter(long length) {
+        int divider = 1;
+        double divedResult = length / (1024d * divider);
+
+        while (divedResult >= 16000) {
+            divedResult = length / (1024d * divider);
+            divider++;
+        }
+
+        return divider;
+    }
+
 
 }

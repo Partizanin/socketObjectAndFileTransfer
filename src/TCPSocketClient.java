@@ -47,7 +47,7 @@ public class TCPSocketClient {
             System.out.println(utils.getCurrentDateTime() + " Підключення встановлено\n");
             DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(writeSocket.getOutputStream()));
             int n = 0;
-            byte[] buf = new byte[4092];
+            byte[] buf = new byte[1024];
 
             String fileName = file.getName();
 
@@ -62,9 +62,14 @@ public class TCPSocketClient {
             int count = 0;
             System.out.println(utils.getCurrentDateTime() + " Передача файлу " + fileName + " розпочато");
             //write file to dos
+            // /*102 323 900*/
+            int logCounter = utils.getLogCounter(file.length());
             while ((n = fis.read(buf)) != -1) {
                 dos.write(buf, 0, n);
                 count += n;
+                if (count % (1024 * (1024 * logCounter)) == 0) {
+                    System.out.println("Передано: " + utils.readableFileSize(count));
+                }
             }
             System.out.println(utils.getCurrentDateTime() + " Передача файлу " + fileName + " закінчено");
             System.out.println("Всього передано: " + utils.readableFileSize(count));
@@ -78,6 +83,7 @@ public class TCPSocketClient {
         }
 
     }
+
 
     private ArrayList<File> readFiles() {
         ArrayList<File> listFiles = new ArrayList<File>();
