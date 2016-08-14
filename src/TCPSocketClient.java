@@ -1,39 +1,71 @@
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 
 public class TCPSocketClient {
+    private Socket socket = null;
+    private ObjectInputStream inputStream = null;
+    private ObjectOutputStream outputStream = null;
+    private boolean isConnected = false;
 
     private TCPSocketClient() {
     }
 
     private void communicate() {
-        try {
-            Socket socket = new Socket("localhost", 4545);
-            InputStream inStream = socket.getInputStream();
-            OutputStream ouStream = socket.getOutputStream();
-            while (socket.isConnected()) {
-                String messageString = "Hello ...This is from client";
-                ouStream.write(messageString.getBytes());
-                System.out.println("Message has written to socket");
-                byte[] byteBuffer = new byte[1024];
-                int numBytes = inStream.read(byteBuffer);
-                byte[] tempBuffer = new byte[numBytes];
-                System.arraycopy(byteBuffer, 0, tempBuffer, 0, numBytes);
-                String message = new String(tempBuffer, "UTF-8");
-                System.out.println("Message from server = " + message);
-                Thread.sleep(2000);
-                socket.close();
+
+        while (!isConnected) {
+            try {
+                socket = new Socket("localHost", 4445);
+                System.out.println("Connected");
+                isConnected = true;
+                outputStream = new ObjectOutputStream(socket.getOutputStream());
+                TransferObject transferObject = new TransferObject(readFiles(),"stop");
+                System.out.println("Object to be written = " + transferObject);
+                outputStream.writeObject(transferObject);
+
+            } catch (SocketException se) {
+                se.printStackTrace();
+// System.exit(0);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (SocketException se) {
-            System.exit(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
+    }
+
+    private ArrayList<MyFile> readFiles() {
+        ArrayList<MyFile> listFiles = new ArrayList<MyFile>();
+
+        File folder = new File("D:\\test");
+        File[] arrFiles = folder.listFiles();
+        FileInputStream fileInputStream = null;
+
+        if (arrFiles != null) {
+            for (File arrFile : arrFiles) {
+
+                if (arrFile.isFile()) {
+                    byte[] bFile = new byte[(int) arrFile.length()];
+
+                    //convert file into array of bytes
+                    try {
+                        fileInputStream = new FileInputStream(arrFile);
+                        fileInputStream.read(bFile);
+                        fileInputStream.close();
+                        for (byte aBFile : bFile) {
+                            System.out.print((char) aBFile);
+                        }
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    listFiles.add(new MyFile(arrFile.getName(), bFile));
+                }
+            }
+        }
+
+        return listFiles;
     }
 
     public static void main(String[] args) {
