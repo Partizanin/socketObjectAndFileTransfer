@@ -2,20 +2,98 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
+import java.text.DecimalFormat;
 
 public class TCPSocketServer {
     private ServerSocket serverSocket = null;
+    private ServerSocket readServerSocket = null;
     private Socket socket = null;
+    private Socket readSocket = null;
     private ObjectInputStream inStream = null;
-    private OutputStream ouStream = null;
+    private InputStream readInStream = null;
+    private OutputStream readOuStream;
+    private TransferObject transferObject;
+    private Thread thread = null;
 
-    private TCPSocketServer() {
+    public static void main(String[] args) {
+        new TCPSocketServer().communicate();
+
+    }
+    TCPSocketServer() {
+        communicate2();
 
     }
 
-    public void communicate() {
+    public void communicate2() {
+           thread = new Thread() {
+            @Override
+            public void run() {
+                int fileCounter = -1;
+                try {
+                    readServerSocket = new ServerSocket(4446);
+                    while (true) {
+                        fileCounter++;
+                        readSocket = readServerSocket.accept();
+                        readInStream = readSocket.getInputStream();
+                        DataInputStream dataInputStream = new DataInputStream(readInStream);
 
+                        String fileName = null;
+                        fileName = dataInputStream.readUTF();
+                        String filePath = "D:\\test\\result\\";
+                        filePath += fileName;
+                        readOuStream = new FileOutputStream(filePath);
+
+
+                        long size = 0;
+                        size = dataInputStream.readLong();
+                        long size2 = size;
+                        long count = 0;
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        try {
+                            while (size > 0 && (bytesRead = dataInputStream.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
+                                readOuStream.write(buffer, 0, bytesRead);
+                                count += bytesRead;
+                                size -= bytesRead;
+                                if (count % (size2 / 5) == 0) {
+                                    System.out.println("Передано: " + readableFileSize(count));
+                                }
+                            }
+                            File file = transferObject.getFiles().get(fileCounter);
+                            System.out.println(file.getName());
+                            System.out.println("Всього передано: " + readableFileSize(count));
+                            System.out.println("Або: " + count + " байт");
+                            System.out.println("Або: " + file.length() + " байт\n");
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        readOuStream.flush();
+
+                            readInStream.close();
+                            readOuStream.close();
+                            readSocket.close();
+                        if (fileCounter == transferObject.getFiles().size() - 1) {
+                            fileCounter = 0;
+                        }
+
+                    }
+
+                } catch (SocketException se) {
+                    se.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }/*todo: Проблема,якщо сокет не закривається то файли "не відпускаються" до тих пір поки він не закриється*/
+        };
+
+        thread.start();
+
+    }
+
+    void communicate() {
         try {
             serverSocket = new ServerSocket(4445);
             while (true) {
@@ -24,11 +102,9 @@ public class TCPSocketServer {
 
                 inStream = new ObjectInputStream(socket.getInputStream());
 
-                TransferObject transferObject = (TransferObject) inStream.readObject();
+                transferObject = (TransferObject) inStream.readObject();
 
                 System.out.println("Object received = " + transferObject);
-                writeFile(transferObject.getFiles());
-
                 if (transferObject.getMessage().equals("stop")) {
                     break;
                 }
@@ -43,27 +119,11 @@ public class TCPSocketServer {
         }
     }
 
-    private void writeFile(ArrayList<MyFile> files){
-        try {
-            for (MyFile file : files) {
-
-                File newFile = new File("D:\\test\\result\\" + file.getFileName());
-                // if file doesnt exists, then create it
-                if (!newFile.exists()) {
-                    newFile.createNewFile();
-                }
-
-                FileOutputStream out = new FileOutputStream(newFile);
-                out.write(file.getByteArray());
-                System.out.println("Done");
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private  String readableFileSize(long size) {
+        if(size <= 0) return "0";
+        final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
+        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
-    public static void main(String[] args) {
-        new TCPSocketServer().communicate();
-    }
 }

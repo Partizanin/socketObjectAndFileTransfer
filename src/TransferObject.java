@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -12,15 +13,15 @@ class TransferObject implements Serializable {
 
     private static final long serialVersionUID = 5950169519310163575L;
 
-    private ArrayList<MyFile> files = new ArrayList<MyFile>();
+    private ArrayList<File> files = new ArrayList<File>();
 
     private String message = "";
 
-    public TransferObject(ArrayList<MyFile> files) {
+    public TransferObject(ArrayList<File> files) {
         this.files = files;
     }
 
-    TransferObject(ArrayList<MyFile> files, String message) {
+    TransferObject(ArrayList<File> files, String message) {
         this.files = files;
         this.message = message;
     }
@@ -33,11 +34,11 @@ class TransferObject implements Serializable {
 
     }
 
-    public void addFile(MyFile file){
+    public void addFile(File file){
         files.add(file);
     }
 
-    public ArrayList<MyFile> getFiles() {
+    public ArrayList<File> getFiles() {
         return files;
     }
 
