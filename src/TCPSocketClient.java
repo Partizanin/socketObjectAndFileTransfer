@@ -15,8 +15,13 @@ public class TCPSocketClient {
     public static void main(String[] args) {
         new TCPSocketClient().communicate();
 
-    }
+//        File oldFilePath = new File("D:\\ARMVZ_SL\\Obmen\\Export\\mc091113.152");
+//        oldFilePath.delete();
 
+
+    }
+/*D:\ARMVZ_SL\Obmen\Export\mc091113.152
+* D:\ARMVZ_SL\Obmen\Export\mc091113.152*/
     void communicate() {
         ArrayList<File> files = readFiles();
         while (!isConnected) {
@@ -28,9 +33,11 @@ public class TCPSocketClient {
                 outputStream = new ObjectOutputStream(socket.getOutputStream());
                 TransferObject transferObject = new TransferObject(files, "Don`t stop");
                 outputStream.writeObject(transferObject);
+                socket.close();
+                outputStream.close();
+
             } catch (SocketException se) {
                 se.printStackTrace();
-// System.exit(0);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -38,7 +45,51 @@ public class TCPSocketClient {
         for (File file : files) {
             communicate2(file);
         }
+
+        transferFileToArchive(files);
     }
+
+    private void transferFileToArchive(ArrayList<File> files) {
+        /*D:\ARMVZ_SL\Obmen\Export\Archiv*/
+
+        for (File file : files) {
+
+            InputStream inStream = null;
+            OutputStream outStream = null;
+            File oldFilePath = null;
+
+            try {
+
+                oldFilePath = new File(file.getPath());
+                File newFilePath = new File("D:\\ARMVZ_SL\\Obmen\\Export\\Archiv\\" + file.getName());
+
+                inStream = new FileInputStream(oldFilePath);
+                outStream = new FileOutputStream(newFilePath);
+
+                byte[] buffer = new byte[1024];
+
+                int length;
+                //copy the file content in bytes
+                while ((length = inStream.read(buffer)) > 0) {
+                    outStream.write(buffer, 0, length);
+                }
+
+                System.out.println("File " + file.getName() + " is copied successful!");
+
+                inStream.close();
+                outStream.close();
+                file.delete();
+
+                //delete the original file
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+
 
     private void communicate2(File file) {
         Socket writeSocket = null;
@@ -78,6 +129,8 @@ public class TCPSocketClient {
 
             dos.flush();
             dos.close();
+            fis.close();
+            writeSocket.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -133,6 +186,7 @@ public class TCPSocketClient {
             }
 
         }
+        System.out.println();
         return files;
     }
 
@@ -144,7 +198,6 @@ public class TCPSocketClient {
         if (arrFiles != null) {
             listFiles = fileFilter(arrFiles);
         }
-        System.out.println();
         return listFiles;
     }
 

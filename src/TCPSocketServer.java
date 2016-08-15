@@ -39,7 +39,7 @@ public class TCPSocketServer {
 
                         String fileName = null;
                         fileName = dataInputStream.readUTF();
-                        String filePath = "D:\\ARMVZ_SL\\Obmen\\Export\\Archiv\\";
+                        String filePath = "D:\\ARMVZ_SL\\Obmen\\Export\\test\\";
                         filePath += fileName;
                         readOuStream = new FileOutputStream(filePath);
 
