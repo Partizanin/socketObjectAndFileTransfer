@@ -39,7 +39,7 @@ public class TCPSocketServer {
 
                         String fileName = null;
                         fileName = dataInputStream.readUTF();
-                        String filePath = "D:\\test\\result\\";
+                        String filePath = "D:\\ARMVZ_SL\\Obmen\\Export\\Archiv\\";
                         filePath += fileName;
                         readOuStream = new FileOutputStream(filePath);
 
@@ -113,8 +113,6 @@ public class TCPSocketServer {
                 inStream = new ObjectInputStream(socket.getInputStream());
 
                 transferObject = (TransferObject) inStream.readObject();
-
-                System.out.println(utils.getCurrentDateTime() + " Object is refused" + transferObject.getMessage() + "\n");
 
                 if (transferObject.getMessage().equals("stop")) {
                     break;

@@ -11,4 +11,4 @@
 
 .idea/
 out/
-socketObjectTransfer.iml
+*.iml

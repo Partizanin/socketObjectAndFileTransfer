@@ -14,6 +14,7 @@ public class TCPSocketClient {
 
     public static void main(String[] args) {
         new TCPSocketClient().communicate();
+
     }
 
     void communicate() {
@@ -84,19 +85,64 @@ public class TCPSocketClient {
 
     }
 
+    /*mput C:\Armvz_sl\obmen\export\mc09*
+    mput C:\Armvz_sl\obmen\export\dc09*
+    mput C:\Armvz_sl\obmen\export\d*.dbf
+    mput C:\Armvz_sl\obmen\export\0*.dbf
+
+    cd /incoming/PEREDPLATA
+    mput C:\Armvz_sl\obmen\export\1*.dbf
+    mput C:\Armvz_sl\obmen\export\5*.dbf
+    mput C:\Armvz_sl\obmen\export\SP*.dbf*/
+
+    private ArrayList<File> fileFilter(File[] allFiles) {
+        ArrayList<File> files = new ArrayList<File>();
+
+        for (File allFile : allFiles) {
+
+            String name = allFile.getName();
+
+            if (name.toLowerCase().matches(".*" + "mc09" + ".*")) {
+                System.out.println(utils.getCurrentDateTime() +
+                        " Знайдено файл " + allFile.getName() + " " + utils.readableFileSize(allFile.length()));
+                files.add(allFile);
+            } else if (name.toLowerCase().matches(".*" + "dc09" + ".*")) {
+                System.out.println(utils.getCurrentDateTime() +
+                        " Знайдено файл " + allFile.getName() + " " + utils.readableFileSize(allFile.length()));
+                files.add(allFile);
+            } else if (name.toLowerCase().matches(".*" + "d*.dbf" + ".*")) {
+                System.out.println(utils.getCurrentDateTime() +
+                        " Знайдено файл " + allFile.getName() + " " + utils.readableFileSize(allFile.length()));
+                files.add(allFile);
+            } else if (name.toLowerCase().matches(".*" + "0*.dbf" + ".*")) {
+                System.out.println(utils.getCurrentDateTime() +
+                        " Знайдено файл " + allFile.getName() + " " + utils.readableFileSize(allFile.length()));
+                files.add(allFile);
+            } else if (name.toLowerCase().matches(".*" + "1*.dbf" + ".*")) {
+                System.out.println(utils.getCurrentDateTime() +
+                        " Знайдено файл " + allFile.getName() + " " + utils.readableFileSize(allFile.length()));
+                files.add(allFile);
+            } else if (name.toLowerCase().matches(".*" + "5*.dbf" + ".*")) {
+                System.out.println(utils.getCurrentDateTime() +
+                        " Знайдено файл " + allFile.getName() + " " + utils.readableFileSize(allFile.length()));
+                files.add(allFile);
+            } else if (name.toLowerCase().matches(".*" + "SP*.dbf" + ".*")) {
+                System.out.println(utils.getCurrentDateTime() +
+                        " Знайдено файл " + allFile.getName() + " " + utils.readableFileSize(allFile.length()));
+                files.add(allFile);
+            }
+
+        }
+        return files;
+    }
 
     private ArrayList<File> readFiles() {
         ArrayList<File> listFiles = new ArrayList<File>();
 
-        File folder = new File("D:\\test");
+        File folder = new File("D:\\ARMVZ_SL\\Obmen\\Export");
         File[] arrFiles = folder.listFiles();
         if (arrFiles != null) {
-            for (File arrFile : arrFiles) {
-                if (arrFile.isFile()) {
-                    System.out.println(utils.getCurrentDateTime() + " Знайдено файл " + arrFile.getName() + " " + utils.readableFileSize(arrFile.length()));
-                    listFiles.add(arrFile);
-                }
-            }
+            listFiles = fileFilter(arrFiles);
         }
         System.out.println();
         return listFiles;
