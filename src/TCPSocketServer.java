@@ -32,9 +32,9 @@ public class TCPSocketServer {
                 try {
                     readServerSocket = new ServerSocket(4446);
                     while (true) {
-                        fileCounter++;
                         readSocket = readServerSocket.accept();
                         readInStream = readSocket.getInputStream();
+                        fileCounter++;
                         DataInputStream dataInputStream = new DataInputStream(readInStream);
 
                         String fileName = null;
@@ -71,7 +71,7 @@ public class TCPSocketServer {
                             File file = currentFile;
                             System.out.println(file.getName());
                             System.out.println("Всього передано: " + utils.readableFileSize(count));
-                            System.out.println("Або: " + file.length() + " байт\n");
+                            System.out.println();
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -82,7 +82,7 @@ public class TCPSocketServer {
                         readInStream.close();
                         readOuStream.close();
                         readSocket.close();
-                        if (fileCounter == transferObject.getFiles().size() - 1) {
+                        if (fileCounter >= transferObject.getFiles().size() - 1) {
                             fileCounter = 0;
                         }
 

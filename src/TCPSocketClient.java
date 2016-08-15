@@ -24,29 +24,33 @@ public class TCPSocketClient {
 * D:\ARMVZ_SL\Obmen\Export\mc091113.152*/
     void communicate() {
         ArrayList<File> files = readFiles();
-        while (!isConnected) {
-            try {
-                System.out.println(utils.getCurrentDateTime() + " Підключення до сервера " + "IP - localHost:4445");
-                socket = new Socket("localHost", 4445);
-                System.out.println(utils.getCurrentDateTime() + " Підключення встановлено\n");
-                isConnected = true;
-                outputStream = new ObjectOutputStream(socket.getOutputStream());
-                TransferObject transferObject = new TransferObject(files, "Don`t stop");
-                outputStream.writeObject(transferObject);
-                socket.close();
-                outputStream.close();
+        if (files.size() > 0) {
+            while (!isConnected) {
+                try {
+                    System.out.println(utils.getCurrentDateTime() + " Підключення до сервера " + "IP - localHost:4445");
+                    socket = new Socket("localHost", 4445);
+                    System.out.println(utils.getCurrentDateTime() + " Підключення встановлено\n");
+                    isConnected = true;
+                    outputStream = new ObjectOutputStream(socket.getOutputStream());
+                    TransferObject transferObject = new TransferObject(files, "Don`t stop");
+                    outputStream.writeObject(transferObject);
+                    socket.close();
+                    outputStream.close();
 
-            } catch (SocketException se) {
-                se.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+                } catch (SocketException se) {
+                    se.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        for (File file : files) {
-            communicate2(file);
-        }
+            for (File file : files) {
+                communicate2(file);
+            }
 
-        transferFileToArchive(files);
+            transferFileToArchive(files);
+        }else {
+            System.out.println("файли не знайдено!!!");
+        }
     }
 
     private void transferFileToArchive(ArrayList<File> files) {
